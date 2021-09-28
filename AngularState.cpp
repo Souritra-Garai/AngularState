@@ -1,3 +1,14 @@
+/**
+ * @file AngularState.cpp
+ * @author Souritra Garai (souritra.garai@iitgn.ac.in)
+ * @brief Implementation of non inline methods of AngularState class
+ * @version 1.0
+ * @date 2021-09-28
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "AngularState.h"
 
 // Constructor

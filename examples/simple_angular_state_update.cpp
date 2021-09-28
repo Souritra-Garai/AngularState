@@ -1,11 +1,15 @@
 /**
- * @file VelocityCalculationTimer.cpp
+ * @file simple_angular_state_update.cpp
  * @author Souritra Garai (souritra.garai@iitgn.ac.in)
  * @brief This is an example code to estimate angular velocity 
  * and acceleration of a rotating shaft with an encoder attached 
  * to it, using the AngularState class.
  * 
- * @version 0.2
+ * This example can run on both NodeMCU ESP8266
+ * and Arduino AVR / ATmega boards,
+ * subject to the availability of interrupt pins.
+ * 
+ * @version 1.0
  * @date 2021-06-30
  * 
  * @copyright Copyright (c) 2021
@@ -22,8 +26,8 @@
 
 // Encoder outputs attached to these
 // interrupt pins
-#define ENCODER_PIN_A D7
-#define ENCODER_PIN_B D8
+#define ENCODER_PIN_A D5
+#define ENCODER_PIN_B D6
 
 // Frequency at which angular state will be sampled / updated
 #define ANGULAR_STATE_UPDATE_FREQUENCY 50 // Hz
@@ -57,7 +61,7 @@ float last_serial_print_time;
 // microseconds after which angular state is updated
 float angular_state_update_interval_sum;
 
-// Variable to store the number of velocity updates 
+// Variable to store the number of angular state updates 
 // that are performed
 float number_angular_state_updates;
 
@@ -69,21 +73,21 @@ void setup()
 	// Initialize global variables
 	angular_state_update_interval_sum	= 0;
 	number_angular_state_updates		= 0;
-
-	Serial.println("Arduino Initialized successfully");
 	
 	current_time = micros();
 	last_angular_state_update_time	= current_time;
 	last_serial_print_time			= current_time;
+
+	Serial.println("Arduino Initialized successfully");
 }
 
 void loop()
 {
 	current_time = micros();
 
-	if (current_time - last_angular_state_update_time > 1E6 / ANGULAR_STATE_UPDATE_FREQUENCY)
+	if (current_time - last_angular_state_update_time >= 1E6 / ANGULAR_STATE_UPDATE_FREQUENCY)
 	{
-		encoder_shaft.updateAngularVelocity();
+		encoder_shaft.updateAngularState();
 
 		angular_state_update_interval_sum += current_time - last_angular_state_update_time;
 		number_angular_state_updates += 1.0f;
@@ -91,7 +95,7 @@ void loop()
 		last_angular_state_update_time = current_time;
 	}
 
-	if (current_time - last_serial_print_time > SERIAL_PRINT_TIME_PERIOD)
+	if (current_time - last_serial_print_time >= SERIAL_PRINT_TIME_PERIOD)
 	{
 		float angular_velocity;
 		encoder_shaft.getAngularVelocity(angular_velocity);

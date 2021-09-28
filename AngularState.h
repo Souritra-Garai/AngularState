@@ -8,7 +8,7 @@
  * The rotary encoder provides angular position of the shaft. The initial position 
  * of the shaft, when the system boots up, is assumed to be zero. The Encoder type
  * object increments / decrements the position, a 32-bit integer, in the range 
- * -2147483648 to 2147483647, upon receiving a quadrature rotation from the rotary
+ * -2147483648 to 2147483647, upon receiving a quadrature pulse from the rotary
  * encoder.
  * 
  * This library defines AngularState class. It determines the angular
@@ -106,7 +106,7 @@ class AngularState : public Encoder
          * The post-fix __attribute__((always_inline)) ensures
          * the function is definitely inlined by compiler.
          */
-        inline void updateAngularVelocity() __attribute__((always_inline));
+        inline void updateAngularState() __attribute__((always_inline));
 
         /**
          * @brief Set the value of the variable passed by reference 
@@ -120,6 +120,19 @@ class AngularState : public Encoder
          * velocity is set
          */
         inline void getAngularVelocity(float &angular_velocity)  __attribute__((always_inline));
+
+		/**
+         * @brief Set the value of the variable passed by reference 
+         * - angular_velocity to the current estimated angular velocity
+         * 
+         * When inlined by compiler, it executes under 15 us
+         * The post-fix __attribute__((always_inline)) ensures
+         * the function is definitely inlined by compiler.
+         * 
+         * @param angular_velocity Variable to which the value of current angular
+         * velocity is set
+         */
+        inline void getAngularAcceleration(float &angular_velocity)  __attribute__((always_inline));
 };
 
 /*============================================================================================================*/
@@ -132,7 +145,7 @@ class AngularState : public Encoder
 // Read the shaft position from the encoder
 // and place it at the front of the encoder readings array
 // while shifting other elements one place back
-void AngularState::updateAngularVelocity()
+void AngularState::updateAngularState()
 {
     // memmove(&encoderReadingsArray[1], &encoderReadingsArray[0], 4*sizeof(float));
     // As encoder_readings_array_ is declared as volatile,
@@ -165,6 +178,38 @@ void AngularState::getAngularVelocity(float &angular_velocity)
                 16.0f * encoder_readings_array_[3] +
                 3.0f  * encoder_readings_array_[4]
             ) / (12.0f * time_period_ * counts_per_rotation_);
+
+    #if !defined(ESP8266)
+            
+            // Atomic restorestate will restore the status
+            // of interrupts to whatever it was before it stopped
+            // all interrupts, i.e. enabled / disabled.
+        }
+        
+    #endif
+}
+
+// Calculate and set the argument passed by reference, angular acceleration, from  
+// five encoder readings using a fifth order scheme
+void AngularState::getAngularAcceleration(float &angular_acceleration)
+{
+    #if !defined(ESP8266)
+    
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            // Atomic block prevents any interrupts from
+            // stopping the initializing task
+    
+    #endif
+    
+            // Estimate angular velocity using 5th order scheme
+            angular_acceleration = 2 * PI * (
+                35.0f	* encoder_readings_array_[0] -
+                104.0f	* encoder_readings_array_[1] +
+            	114.0f	* encoder_readings_array_[2] -
+                56.0f	* encoder_readings_array_[3] +
+                11.0f	* encoder_readings_array_[4]
+            ) / (12.0f * time_period_ * time_period_ * counts_per_rotation_);
 
     #if !defined(ESP8266)
             
