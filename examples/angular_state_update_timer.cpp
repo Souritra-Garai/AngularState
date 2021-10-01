@@ -35,7 +35,7 @@
 #define ENCODER_COUNTS_PER_ROTATION 840
 
 // Our object to estimate the angular velocity of encoder shaft
-AngularVelocityCalculator encoder_shaft(
+AngularState encoder_shaft(
 	ENCODER_PIN_A,
 	ENCODER_PIN_B,
 	VELOCITY_UPDATE_FREQUENCY,

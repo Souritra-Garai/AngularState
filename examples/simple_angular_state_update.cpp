@@ -37,7 +37,7 @@
 #define ENCODER_COUNTS_PER_ROTATION 4160
 
 // Angular state object to track the angular velocity of encoder shaft
-AngularVelocityCalculator encoder_shaft(
+AngularState encoder_shaft(
 	ENCODER_PIN_A,
 	ENCODER_PIN_B,
 	ANGULAR_STATE_UPDATE_FREQUENCY,
@@ -76,9 +76,9 @@ void setup()
 	
 	current_time = micros();
 	last_angular_state_update_time	= current_time;
-	last_serial_print_time			= current_time;
+	last_serial_print_time		= current_time;
 
-	Serial.println("Arduino Initialized successfully");
+	Serial.println("Initialized successfully");
 }
 
 void loop()

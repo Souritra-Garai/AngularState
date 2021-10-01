@@ -16,7 +16,7 @@
  * 
  */
 
-#include "AngularVelocityCalculator.h"
+#include "AngularState.h"
 
 // Encoder outputs attached to these
 // interrupt pins
@@ -34,7 +34,7 @@
 #define ANGULAR_STATE_UPDATE_FREQUENCY 50 // Hz
 
 // Angular state object to track the angular velocity of encoder shaft
-AngularVelocityCalculator encoder_shaft(
+AngularState encoder_shaft(
 	ENCODER_PIN_A,
 	ENCODER_PIN_B,
 	ANGULAR_STATE_UPDATE_FREQUENCY,
@@ -104,7 +104,7 @@ void setup()
 	last_serial_print_time			= current_time;
 	last_velocity_get_time			= current_time;
 
-	Serial.println("Arduino Initialized successfully");
+	Serial.println("Initialized successfully");
 }
 
 void loop()
